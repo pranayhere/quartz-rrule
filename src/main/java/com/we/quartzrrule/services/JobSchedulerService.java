@@ -1,7 +1,6 @@
 package com.we.quartzrrule.services;
 
-import com.we.quartzrrule.jobs.PrintRecurringJob;
-import com.we.quartzrrule.jobs.RecurringJob;
+import com.we.quartzrrule.jobs.PrintJob;
 import com.we.quartzrrule.jobs.SimpleJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -39,13 +38,14 @@ public class JobSchedulerService {
 
     public void scheduleRecurringJob() throws SchedulerException {
         logger.info("Scheduling recurring job to quartz");
-        JobDetail job = JobBuilder.newJob(PrintRecurringJob.class)
+
+        JobDetail job = JobBuilder.newJob(PrintJob.class)
                 .withIdentity("RecurringJob", "RecurringJobGroup")
+                .usingJobData("rrule", "RRULE:FREQ=DAILY;DTSTART=20200530T91520Z;UNTIL=20200603T183000Z")
                 .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity("RecurringJobTrigger")
-                .usingJobData("count", 10)
                 .startNow()
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule())
                 .build();
