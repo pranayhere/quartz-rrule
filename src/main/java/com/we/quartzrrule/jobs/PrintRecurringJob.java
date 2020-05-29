@@ -14,12 +14,13 @@ public class PrintRecurringJob extends RecurringJob {
     @Override
     protected void doExecute(JobExecutionContext ctx) throws JobExecutionException {
         JobDataMap map = ctx.getJobDetail().getJobDataMap();
-        System.out.println("Executing " + ctx.getJobDetail().getKey().getName() + " with " + new LinkedHashMap<>(map));
+        JobDataMap triggerMap = ctx.getTrigger().getJobDataMap();
+        System.out.println("Executing " + ctx.getJobDetail().getKey().getName() + " with " + new LinkedHashMap<>(map) + " triggerMap : " + new LinkedHashMap<>(triggerMap));
 
         map.put("jobTime", new Date().toString());
         map.put("jobValue", new Random().nextLong());
 
         COUNT++;
-        chainJob(ctx, PrintRecurringJob.class, ctx.getJobDetail().getKey().getName() + "-" +COUNT, ctx.getJobDetail().getKey().getGroup());
+        chainJob(ctx, PrintRecurringJob.class, ctx.getJobDetail().getKey().getName(), ctx.getJobDetail().getKey().getGroup());
     }
 }

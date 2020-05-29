@@ -41,33 +41,31 @@ public abstract class RecurringJob implements Job {
 
     private void chain(JobExecutionContext ctx) throws SchedulerException {
         JobDataMap map = ctx.getJobDetail().getJobDataMap();
+        JobDataMap triggerMap = ctx.getTrigger().getJobDataMap();
+
         @SuppressWarnings("unchecked")
         Class jobClass = (Class) map.remove(CHAIN_JOB_CLASS);
         String jobName = (String) map.remove(CHAIN_JOB_NAME);
         String jobGroup = (String) map.remove(CHAIN_JOB_GROUP);
 
-        logger.info("Chaining Job : " + jobName);
-        int count = (int) map.get("count");
+        int count = (int) triggerMap.get("count");
         count--;
+        logger.info("Chaining Job : " + jobName + " count : " + count);
 
         if (count == 0) {
             return;
         }
 
-        JobDetail job = JobBuilder.newJob(jobClass)
-                .withIdentity(jobName, jobGroup)
-                .usingJobData(map)
-                .usingJobData("count", count)
-                .build();
+        Trigger oldTrigger = ctx.getTrigger();
 
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity(jobName + "Trigger", jobGroup + "Trigger")
+                .usingJobData("count", count)
                 .startAt(new Date(System.currentTimeMillis() + 5000L))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule())
                 .build();
 
-
-        scheduler.scheduleJob(job, trigger);
+        scheduler.rescheduleJob(oldTrigger.getKey(), trigger);
     }
 
     protected abstract void doExecute(JobExecutionContext ctx) throws JobExecutionException;

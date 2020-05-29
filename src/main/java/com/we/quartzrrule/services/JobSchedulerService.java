@@ -41,11 +41,11 @@ public class JobSchedulerService {
         logger.info("Scheduling recurring job to quartz");
         JobDetail job = JobBuilder.newJob(PrintRecurringJob.class)
                 .withIdentity("RecurringJob", "RecurringJobGroup")
-                .usingJobData("count", 10)
                 .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity("RecurringJobTrigger")
+                .usingJobData("count", 10)
                 .startNow()
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule())
                 .build();
