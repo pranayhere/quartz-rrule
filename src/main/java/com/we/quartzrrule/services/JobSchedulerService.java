@@ -64,7 +64,8 @@ public class JobSchedulerService {
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity("CustomRecurringRuleTrigger")
                 .startNow()
-                .withSchedule(RecurrenceRuleScheduleBuilder.recurrenceRuleSchedule("RRULE:FREQ=SECONDLY;INTERVAL=30;DTSTART=20200606T91520Z;UNTIL=20200609T183000Z"))
+                .withSchedule(
+                        RecurrenceRuleScheduleBuilder.recurrenceRuleSchedule("RRULE:FREQ=SECONDLY;INTERVAL=30;DTSTART=20200606T91520Z;UNTIL=20200610T183000Z"))
                 .build();
 
         scheduler.scheduleJob(job, trigger);

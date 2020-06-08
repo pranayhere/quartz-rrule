@@ -44,12 +44,13 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     @Override
     public void triggered(org.quartz.Calendar calendar) {
         logger.info("Coming here ");
-        previousFireTime = nextFireTime;
-        nextFireTime = getFireTimeAfter(nextFireTime);
+        setRecurrenceRuleExpression(this.recurrenceRuleExpression);
+        this.previousFireTime = this.nextFireTime;
+        this.nextFireTime = getFireTimeAfter(nextFireTime);
 
-        while (nextFireTime != null && calendar != null && !calendar.isTimeIncluded(nextFireTime.getTime())) {
+        while (this.nextFireTime != null && calendar != null && !calendar.isTimeIncluded(this.nextFireTime.getTime())) {
             logger.info("Coming here : while loop");
-            nextFireTime = getFireTimeAfter(nextFireTime);
+            this.nextFireTime = getFireTimeAfter(nextFireTime);
         }
 
         logger.info("previousFireTime : " + previousFireTime + " - nextFireTime" + nextFireTime);
@@ -68,9 +69,9 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     }
 
     public void setRecurrenceRuleExpression(String rruleExpression) {
-        recurrenceRuleExpression = rruleExpression;
+        this.recurrenceRuleExpression = rruleExpression;
         RuleParser rruleParser = new RRuleParser(rruleExpression, null);
-        recurrenceRule = rruleParser.parse();
+        this.recurrenceRule = rruleParser.parse();
     }
 
     public RRule getRecurrenceRule() {
