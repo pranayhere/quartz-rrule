@@ -7,6 +7,8 @@ import com.we.recurr.parser.RuleParser;
 import org.quartz.ScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.impl.triggers.AbstractTrigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,6 +17,8 @@ import java.util.Date;
 import java.util.Iterator;
 
 public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTrigger> implements RecurrenceRuleTrigger {
+
+    private static final Logger logger = LoggerFactory.getLogger(RecurrenceRuleTriggerImpl.class);
 
     private static final long serialVersionUID = -2658978876664286825L;
     private static final int YEAR_TO_GIVEUP_SCHEDULING_AT = Calendar.getInstance().get(java.util.Calendar.YEAR) + 100;
@@ -29,14 +33,26 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     }
 
     @Override
+    public Object clone() {
+        RecurrenceRuleTriggerImpl copy = (RecurrenceRuleTriggerImpl) super.clone();
+        if (getRecurrenceRuleExpression() != null) {
+            copy.setRecurrenceRuleExpression(getRecurrenceRuleExpression());
+        }
+        return copy;
+    }
+
+    @Override
     public void triggered(org.quartz.Calendar calendar) {
-//        CronTrigger trigger = new CronTriggerImpl();
+        logger.info("Coming here ");
         previousFireTime = nextFireTime;
         nextFireTime = getFireTimeAfter(nextFireTime);
 
         while (nextFireTime != null && calendar != null && !calendar.isTimeIncluded(nextFireTime.getTime())) {
+            logger.info("Coming here : while loop");
             nextFireTime = getFireTimeAfter(nextFireTime);
         }
+
+        logger.info("previousFireTime : " + previousFireTime + " - nextFireTime" + nextFireTime);
     }
 
     @Override
@@ -47,6 +63,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
             nextFireTime = getFireTimeAfter(nextFireTime, true);
         }
 
+        logger.info("computeFirstFireTime.nextFireTime : " + nextFireTime);
         return nextFireTime;
     }
 
@@ -279,6 +296,14 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
 
     @Override
     public ScheduleBuilder<RecurrenceRuleTrigger> getScheduleBuilder() {
-        return null;
+        RecurrenceRuleScheduleBuilder rrb = RecurrenceRuleScheduleBuilder.recurrenceRuleSchedule(getRecurrenceRuleExpression());
+
+        if (MISFIRE_INSTRUCTION_DO_NOTHING == getMisfireInstruction()) {
+            rrb.withMisfireHandlingInstructionDoNothing();
+        } else if (MISFIRE_INSTRUCTION_FIRE_ONCE_NOW == getMisfireInstruction()) {
+            rrb.withMisfireHandlingInstructionFireAndProceed();
+        }
+
+        return rrb;
     }
 }

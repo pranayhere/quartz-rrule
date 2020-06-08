@@ -23,4 +23,10 @@ public class JobSchedulerController {
         jobSchedulerService.scheduleRecurringJob();
         return "Success";
     }
+
+    @PostMapping("/customTrigger")
+    public String scheduleWithCustomTrigger() throws SchedulerException {
+        jobSchedulerService.scheduleRecurringRuleWithTrigger();
+        return "Success";
+    }
 }
