@@ -44,7 +44,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     @Override
     public void triggered(org.quartz.Calendar calendar) {
         logger.info("Coming here ");
-        setRecurrenceRuleExpression(this.recurrenceRuleExpression);
+//        setRecurrenceRuleExpression(this.recurrenceRuleExpression);
         this.previousFireTime = this.nextFireTime;
         this.nextFireTime = getFireTimeAfter(nextFireTime);
 
@@ -190,7 +190,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     }
 
     protected Date getTimeAfter (Date afterTime, boolean firstTime) {
-        if (getRecurrenceRule() == null) {
+        if (getRecurrenceRuleExpression() == null) {
             return null;
         } else {
             String timeZone = null;
