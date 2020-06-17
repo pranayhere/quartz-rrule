@@ -9,11 +9,13 @@ import org.quartz.spi.MutableTrigger;
 import org.quartz.TriggerBuilder;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRuleTrigger> {
 
     private RRule recurrenceRule;
     private String recurrenceRuleExpression;
+    private TimeZone timeZone;
     private int misfireInstruction = RecurrenceRuleTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 
@@ -29,7 +31,6 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
      * Build the actual Trigger -- NOT intended to be invoked by end users, but will rather be invoked by a TriggerBuilder which this ScheduleBuilder is given to.
      *
      * @return The trigger that has been built.
-     *
      * @see TriggerBuilder#withSchedule(ScheduleBuilder)
      */
     @Override
@@ -39,7 +40,7 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
         rrt.setRecurrenceRule(recurrenceRule, recurrenceRuleExpression); // need way to convert RRule to String
         rrt.setMisfireInstruction(misfireInstruction);
         rrt.setStartTime(new Date()); // incorrect, Start time should be user defined.
-
+        rrt.setTimeZone(this.timeZone.toZoneId().toString());
         return rrt;
     }
 
@@ -48,7 +49,7 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
         return recurrenceRuleSchedule(rruleParser.parse(), recurrenceRuleExpression);
     }
 
-    public static RecurrenceRuleScheduleBuilder recurrenceRuleSchedule (final RRule rrule, final String rruleExpression) {
+    public static RecurrenceRuleScheduleBuilder recurrenceRuleSchedule(final RRule rrule, final String rruleExpression) {
         return new RecurrenceRuleScheduleBuilder(rrule, rruleExpression);
     }
 
@@ -58,7 +59,7 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
      * @return the updated RecurrenceRuleScheduleBuilder
      * @see Trigger#MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY
      */
-    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionIgnoreMisfires () {
+    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionIgnoreMisfires() {
         misfireInstruction = Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY;
         return this;
     }
@@ -69,7 +70,7 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
      * @return the updated RecurrenceRuleScheduleBuilder
      * @see CronTrigger#MISFIRE_INSTRUCTION_DO_NOTHING
      */
-    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionDoNothing () {
+    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionDoNothing() {
         misfireInstruction = CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING;
         return this;
     }
@@ -80,8 +81,13 @@ public class RecurrenceRuleScheduleBuilder extends ScheduleBuilder<RecurrenceRul
      * @return the updated RecurrenceRuleScheduleBuilder
      * @see CronTrigger#MISFIRE_INSTRUCTION_FIRE_ONCE_NOW
      */
-    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionFireAndProceed () {
+    public RecurrenceRuleScheduleBuilder withMisfireHandlingInstructionFireAndProceed() {
         misfireInstruction = CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW;
+        return this;
+    }
+
+    public RecurrenceRuleScheduleBuilder inTimeZone(TimeZone timezone) {
+        this.timeZone = timezone;
         return this;
     }
 }

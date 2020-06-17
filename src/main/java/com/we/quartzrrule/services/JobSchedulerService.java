@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.TimeZone;
+
 @Service
 public class JobSchedulerService {
     private static final Logger logger = LoggerFactory.getLogger(JobSchedulerService.class);
@@ -65,7 +67,10 @@ public class JobSchedulerService {
                 .withIdentity("CustomRecurringRuleTrigger")
                 .startNow()
                 .withSchedule(
-                        RecurrenceRuleScheduleBuilder.recurrenceRuleSchedule("RRULE:FREQ=SECONDLY;INTERVAL=30;DTSTART=20200606T91520Z;UNTIL=20200610T183000Z"))
+                        RecurrenceRuleScheduleBuilder
+                                .recurrenceRuleSchedule("RRULE:FREQ=SECONDLY;INTERVAL=30;DTSTART=20200617T120300Z;UNTIL=20200618T140300Z")
+                                .inTimeZone(TimeZone.getTimeZone("Europe/London"))
+                )
                 .build();
 
         scheduler.scheduleJob(job, trigger);

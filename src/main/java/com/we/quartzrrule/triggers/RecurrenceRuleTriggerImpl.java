@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     private Date nextFireTime = null;
     private Date previousFireTime = null;
     private Date fromDate = null;
+    private String timeZone = null;
 
     public RecurrenceRuleTriggerImpl() {
         super();
@@ -44,7 +46,6 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
     @Override
     public void triggered(org.quartz.Calendar calendar) {
         logger.info("Coming here ");
-//        setRecurrenceRuleExpression(this.recurrenceRuleExpression);
         this.previousFireTime = this.nextFireTime;
         this.nextFireTime = getFireTimeAfter(nextFireTime);
 
@@ -136,7 +137,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
 //        }
     }
 
-    public void setRecurrenceRule (RRule rrule, String recurrenceRuleExpression) {
+    public void setRecurrenceRule(RRule rrule, String recurrenceRuleExpression) {
         this.recurrenceRule = rrule;
         this.recurrenceRuleExpression = recurrenceRuleExpression;
     }
@@ -165,7 +166,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
         return getFireTimeAfter(afterTime, false);
     }
 
-    public Date getFireTimeAfter (Date afterTime, boolean firstTime) {
+    public Date getFireTimeAfter(Date afterTime, boolean firstTime) {
         Date after;
         if (afterTime == null) {
             after = new Date();
@@ -189,18 +190,32 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
         return pot;
     }
 
-    protected Date getTimeAfter (Date afterTime, boolean firstTime) {
+
+    /**
+     * The StartTime is basically in the given timeZone
+     * we need now() in the given timezone.
+     *
+     * Hence StartTime is converted to ZoneId.systemDefault
+     * and now is converted to ZoneId.of(timezone)
+     *
+     * @param afterTime
+     * @param firstTime
+     * @return
+     */
+    protected Date getTimeAfter(Date afterTime, boolean firstTime) {
         if (getRecurrenceRuleExpression() == null) {
             return null;
         } else {
-            String timeZone = null;
+            String timezone = getTimeZone();
             Iterator<LocalDateTime> itr = new RecurrenceIterator(getRecurrenceRuleExpression(), null);
 
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime next = null;
+            ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timezone));
+            System.out.println("Current time at " + timezone + " is " + now);
+            ZonedDateTime next = null;
 
             while (itr.hasNext()) {
-                next = itr.next();
+                next = itr.next().atZone(ZoneId.systemDefault());
+                System.out.println(next);
                 if (next.isAfter(now)) {
                     break;
                 } else {
@@ -208,8 +223,7 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
                 }
             }
 
-            ZoneId zoneId = timeZone != null ? ZoneId.of( timeZone ) : ZoneId.systemDefault();
-            return next != null ? Date.from(next.atZone(zoneId).toInstant()) : null;
+            return next != null ? Date.from(next.toInstant()) : null;
         }
     }
 
@@ -306,5 +320,13 @@ public class RecurrenceRuleTriggerImpl extends AbstractTrigger<RecurrenceRuleTri
         }
 
         return rrb;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

@@ -4,6 +4,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.Scheduler;
 import org.quartz.CronTrigger;
+
 import java.util.Calendar;
 
 public interface RecurrenceRuleTrigger extends Trigger {
@@ -44,10 +45,9 @@ public interface RecurrenceRuleTrigger extends Trigger {
      * </p>
      *
      * @return the number of times this trigger should repeat
-     *
      * @see #REPEAT_INDEFINITELY
      */
-    int getRepeatCount ();
+    int getRepeatCount();
 
     /**
      * <p>
@@ -57,5 +57,5 @@ public interface RecurrenceRuleTrigger extends Trigger {
      * @return the trigger builder for this interface.
      */
     @Override
-    TriggerBuilder<RecurrenceRuleTrigger> getTriggerBuilder ();
+    TriggerBuilder<RecurrenceRuleTrigger> getTriggerBuilder();
 }
